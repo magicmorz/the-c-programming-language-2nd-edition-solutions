@@ -11,10 +11,8 @@ main()
     upper = 300;
     step = 20;
 
-    fahr = lower;
-
     printf("Fahrenheit\t Celsius\n");
-    for (fahr = lower; fahr <= upper; fahr = fahr + step)
+    for (fahr = upper; fahr >= lower; fahr = fahr - step)
     {
         printf("%5.0f %17.1f\n", fahr, (5.0 / 9.0) * (fahr - 32.0));
     }
