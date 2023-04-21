@@ -3,7 +3,6 @@
 #define MINLENGTH 80
 
 int getline1(char line[], int limit);
-void copy(char destination[], char source[]);
 
 main()
 {
