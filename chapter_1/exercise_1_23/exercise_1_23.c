@@ -133,5 +133,3 @@ int remove_comments(char program[])
     remove_comment_blocks(program);
 
 }
-
-
