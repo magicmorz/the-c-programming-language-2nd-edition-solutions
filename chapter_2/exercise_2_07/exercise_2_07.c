@@ -15,8 +15,8 @@ unsigned invert(unsigned x, int p, int n)
 {
     // get the bits the are needed to be inverted
     // invert them and save in inverted_bits
-    unsigned short mask = pow(2,n)-1;
-    unsigned short inverted_bits = getbits(x, p, n) ^ mask; 
+    unsigned mask = pow(2,n)-1;
+    unsigned inverted_bits = getbits(x, p, n) ^ mask; 
 
     // put inverted_bits in the right of the mask
     mask = 0xffff | inverted_bits;
