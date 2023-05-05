@@ -15,10 +15,11 @@ unsigned getbits(unsigned x, int p, int n)
 }
 
 unsigned setbits(unsigned x, int p, int n, unsigned y)
-{
+{/*
     x = getbits(y, p, n);
     y = y >> n;
     y = y << n;
     y = y |x;
-    return y;
+    return y;*/
+    return (y>>n<<n|getbits(y, p, n));
 }
