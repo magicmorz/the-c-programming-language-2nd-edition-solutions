@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #define MAX_SIZE 100
 void itob(int n, char s[], int b);
 void reverse(char s[]);
@@ -15,9 +16,12 @@ void itob(int n, char s[], int b)
 {
     int remainder;
     int i;
-    for (i = 0; n > 0; i++, n /= b)
+    int sign = n < 10;
+    
+    
+    for (i = 0; abs(n) > 0; i++, n /= b)
     {
-        remainder = n % b;
+        remainder = abs(n) % b;
         if ((b == 16) && (remainder > 9))
         {
             s[i] = '0' + remainder + 7;
@@ -28,6 +32,11 @@ void itob(int n, char s[], int b)
         }
         
     }
+    if (sign)
+    {
+        s[i++]= '-';
+    }
+    
     s[i] = '\0';
     reverse(s);
 }
