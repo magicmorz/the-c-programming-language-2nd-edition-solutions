@@ -54,7 +54,7 @@ double atof(char s[])
                     power = 10.0 * power + (s[i] - '0');
                 }
                 return (sign == -1) ? value_until_point / pow(10, power) +value_after_point / pow(10, power+ len_after_point) : value_until_point * pow(10, power) + value_after_point;
-            }
+            } 
         }
         else if ((s[i] == 'e') || (s[i] == 'E'))
         {
