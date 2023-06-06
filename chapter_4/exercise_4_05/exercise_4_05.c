@@ -1,3 +1,5 @@
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -16,18 +18,26 @@ void ungetch(int);
 int sp = 0;
 double val[MAXVAL];
 
-void top(void)
+void swap_top_two()
+{
+    double op1 = pop();
+    double op2 = pop();
+    push(op1);
+    push(op2);
+}
+
+double top(void)
 {
     if (sp)
     {
-       printf("%f\n", val[sp-1]);
+        return val[sp - 1];
+        // printf("%f\n", val[sp-1]);
     }
-    
-       else
-       {
+
+    else
+    {
         printf("stack is empty\n");
-       }
-    
+    }
 }
 
 void push(double f)
@@ -66,6 +76,7 @@ int getop(char s[])
         s[i] = c;
         if (!isdigit(c = getch()))
         {
+            ungetch(c);
             return '-';
         }
         else
@@ -144,6 +155,13 @@ int main()
                 printf("error: zero divisor\n");
             break;
 
+        case 't':
+            printf("%f\n", top());
+            break;
+
+        case 's':
+            swap_top_two();
+            break;
         case '^':
             op2 = pop();
             push(pow(pop(), op2));
@@ -156,7 +174,6 @@ int main()
         case 'e':
             push(exp(pop()));
             break;
-
         case '\n':
             printf("\t%.8g\n", pop());
             break;
