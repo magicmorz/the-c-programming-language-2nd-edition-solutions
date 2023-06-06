@@ -1,5 +1,3 @@
-
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -17,6 +15,7 @@ void ungetch(int);
 
 int sp = 0;
 double val[MAXVAL];
+double last_printed_value;
 
 void swap_top_two()
 {
@@ -31,7 +30,6 @@ double top(void)
     if (sp)
     {
         return val[sp - 1];
-        // printf("%f\n", val[sp-1]);
     }
 
     else
@@ -174,7 +172,13 @@ int main()
         case 'e':
             push(exp(pop()));
             break;
+
+        case 'l':
+            push(last_printed_value);
+            break;
+
         case '\n':
+            last_printed_value = top();
             printf("\t%.8g\n", pop());
             break;
         }
