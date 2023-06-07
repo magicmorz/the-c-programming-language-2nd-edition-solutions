@@ -162,6 +162,11 @@ int main()
             swap_top_two();
             break;
 
+        case 'c':
+            for (int i = 0; i < MAXVAL; val[i] = ' ', i++)
+                ;
+            break;
+
         case '\n':
             printf("\t%.8g\n", pop());
             break;

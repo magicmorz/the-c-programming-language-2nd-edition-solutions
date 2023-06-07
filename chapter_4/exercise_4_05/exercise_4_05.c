@@ -89,8 +89,8 @@ int getop(char s[])
 
     s[i] = '\0';
     printf("%s\n", s);
-    if (c != EOF)
-        ungetch(c);
+    // if (c != EOF)
+    //  ungetch(c);
     return NUMBER;
 }
 
@@ -175,6 +175,11 @@ int main()
 
         case 'l':
             push(last_printed_value);
+            break;
+
+        case 'c':
+            for (int i = 0; i < MAXVAL; val[i] = ' ', i++)
+                ;
             break;
 
         case '\n':
