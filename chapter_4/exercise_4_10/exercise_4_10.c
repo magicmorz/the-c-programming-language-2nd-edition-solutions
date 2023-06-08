@@ -75,14 +75,13 @@ char bufp = 0;
 int main()
 {
     int type;
-    double op2;
+    double op2, op1;
     char s[MAXOP];
 
     char input_line[MAXVAL];
     get_line(input_line);
     while (strchr(input_line, EOF) == NULL)
     {
-        get_line(input_line);
 
         int j;
         for (int i = 0; input_line[i] != '\0'; i++)
@@ -147,16 +146,18 @@ int main()
 
             if (input_line[i] == '-') // if minus
             {
-                s[j++] = input_line[i];
+                // s[j++] = input_line[i];
                 if (!isdigit(input_line[i + 1]))
                 {
 
                     op2 = pop();
-                    push(pop() - op2);
+                    op1 = pop();
+                    push(op1 - op2);
                     j = 0;
+                    continue;
                 }
                 else
-                    s[++j] = input_line[i];
+                    s[j++] = input_line[++i];
             }
 
             if (isalpha(input_line[i])) // if variable
@@ -221,6 +222,7 @@ int main()
             push(atof(s));
             j = 0;
         }
+        get_line(input_line);
     }
 
     return 0;
