@@ -65,99 +65,54 @@ int getop(char s[])
     int i, c;
     if (last_c == 0)
     {
-        while ((s[0] = c = getch()) == ' ' || c == '\t')
-            ;
-        s[1] = '\0';
-
-        if (!isdigit(c) && c != '.' && c != '-' && !isalpha(c))
-            return c;
-        i = 0;
-
-        if (c == '-')
-        {
-            s[i] = c;
-            if (!isdigit(c = getch()))
-            {
-                last_c = c;
-                return '-';
-            }
-            else
-                s[++i] = c;
-        }
-        if (isalpha(c))
-        {
-            while (isalpha(s[++i] = c = getch()))
-                ;
-            s[i] = '\0';
-            return TEXT;
-        }
-        if (isdigit(c))
-            while (isdigit(s[++i] = c = getch()))
-                ;
-        if (c == '.')
-            while (isdigit(s[++i] = c = getch()))
-                ;
-
-        s[i] = '\0';
-        printf("%s\n", s);
-        // if (c != EOF)
-        //  ungetch(c);
-        return NUMBER;
+        c = getch();
     }
     else
     {
-        if (last_c == '\n')
-        {
-            last_c = 0;
-            return '\n';
-        }
-        if (last_c == ' ' || last_c == '\t')
-        {
-            last_c = 0;
-           while ((s[0] = c = getch()) == ' ' || c == '\t')
-            ;
-        }
-        
-        
-        
-         
-        s[1] = '\0';
-
-        if (!isdigit(c) && c != '.' && c != '-' && !isalpha(c))
-            return c;
-        i = 0;
-
-        if (c == '-')
-        {
-            s[i] = c;
-            if (!isdigit(c = getch()))
-            {
-                last_c = c;
-                return '-';
-            }
-            else
-                s[++i] = c;
-        }
-        if (isalpha(c))
-        {
-            while (isalpha(s[++i] = c = getch()))
-                ;
-            s[i] = '\0';
-            return TEXT;
-        }
-        if (isdigit(c))
-            while (isdigit(s[++i] = c = getch()))
-                ;
-        if (c == '.')
-            while (isdigit(s[++i] = c = getch()))
-                ;
-
-        s[i] = '\0';
-        printf("%s\n", s);
-        // if (c != EOF)
-        //  ungetch(c);
-        return NUMBER;
+        c = last_c;
+        last_c = 0;
     }
+
+    while ((s[0] = c ) == ' ' || c == '\t')
+        {
+            c = getch();
+        }
+    s[1] = '\0';
+
+    if (!isdigit(c) && c != '.' && c != '-' && !isalpha(c))
+        return c;
+    i = 0;
+
+    if (c == '-')
+    {
+        s[i] = c;
+        if (!isdigit(c = getch()))
+        {
+            last_c = c;
+            return '-';
+        }
+        else
+            s[++i] = c;
+    }
+    if (isalpha(c))
+    {
+        while (isalpha(s[++i] = c = getch()))
+            ;
+        s[i] = '\0';
+        return TEXT;
+    }
+    if (isdigit(c))
+        while (isdigit(s[++i] = c = getch()))
+            ;
+    if (c == '.')
+        while (isdigit(s[++i] = c = getch()))
+            ;
+
+    s[i] = '\0';
+    printf("%s\n", s);
+    // if (c != EOF)
+    //  ungetch(c);
+    return NUMBER;
 }
 
 char buf[BUFSIZE];
