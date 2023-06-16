@@ -4,7 +4,7 @@ int main()
     char s[40];
     while (s[0]!=EOF)
     {
-        getline1(&s);
+        getline1(s);
         printf("%s\n",s);
     }
     
