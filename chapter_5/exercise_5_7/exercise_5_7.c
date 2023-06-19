@@ -2,10 +2,11 @@
 #include <string.h>
 
 #define MAXLINES 5000 /* max #lines to be sorted */
+#define MAXSTORE 5000
 
 char *lineptr[MAXLINES];
 
-int readlines(char *lineptr[], int nlines);
+int readlines(char *lineptr[], int maxlines, char *linestore);
 void writelines(char *lineptr[], int nlines);
 void swap(char *v[], int i, int j);
 
@@ -14,8 +15,9 @@ void qsort(char *lineptr[], int left, int right);
 /* sort input lines */
 main()
 {
+    char* linestore[MAXSTORE];
     int nlines; /* number of input lines read */
-    if ((nlines = readlines(lineptr, MAXLINES)) >= 0)
+    if ((nlines = readlines(lineptr, MAXLINES, linestore)) >= 0)
     {
         qsort(lineptr, 0, nlines - 1);
         writelines(lineptr, nlines);
@@ -30,18 +32,18 @@ main()
 
 #define MAXLEN 1000 /* max length of any input line*/
 size_t getline1(char line[], size_t max_line_len);
-char *alloc(int);
 
 /* readlines: read input lines */
-int readlines(char *lineptr[], int maxlines)
+int readlines(char *lineptr[], int maxlines, char *linestore)
 {
     int len, nlines;
-    char *p, line[MAXLEN];
+    char *p = linestore, line[MAXLEN];
+    char *lines_stop = linestore + MAXSTORE;
 
     nlines = 0;
     while ((len = getline1(line, MAXLEN)) > 0)
     {
-        if (nlines >= maxlines || (p = alloc(len)) == NULL)
+        if (nlines >= maxlines || p+len > lines_stop)
         {
             return -1;
         }
@@ -50,6 +52,7 @@ int readlines(char *lineptr[], int maxlines)
             line[len - 1] = '\0'; /* delete newline */
             strcpy(p, line);
             lineptr[nlines++] = p;
+            p+=len;
         }
     }
     return nlines;
@@ -113,20 +116,4 @@ size_t getline1(char line[], size_t max_line_len)
   line[i] = '\0';
 
   return i;
-}
-#define ALLOCSIZE 10000
-static char allocbuf[ALLOCSIZE];
-static char *allocp = allocbuf;
-
-char *alloc(int n)
-{
-    if (allocbuf + ALLOCSIZE - allocp >= n)
-    {
-        allocp += n;
-        return allocp - n;
-    }
-    else
-    {
-        return 0;
-    }
 }
