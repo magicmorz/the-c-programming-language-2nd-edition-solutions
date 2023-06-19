@@ -1,20 +1,24 @@
 #include <stdio.h>
+int getline1(char *s, int n);
 int main()
 {
     char s[40];
-    while (*s!=EOF)
+    int n;
+    while (getline1(s, n) > 0)
     {
-        getline1(s);
-        printf("%s\n",s);
+        printf("%s\n", s);
     }
-    
+
     return 0;
 }
 
-void getline1(char *s)
+int getline1(char *s, int n)
 {
-    while (((*s = getchar())!= '\n')&&(*s++!=EOF))
-    ;
+    n = 0;
+    while (((*s = getchar()) != '\n') && (*s++ != EOF))
+    {
+        n++;
+    }
     *s = '\0';
-    
+    return n;
 }
