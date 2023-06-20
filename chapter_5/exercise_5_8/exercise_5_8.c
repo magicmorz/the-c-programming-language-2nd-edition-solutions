@@ -43,7 +43,7 @@ int check_day_of_month_valid(int year, int month, int day)
 {
     int leap;
     leap = year % 4 == 0 && year % 100 != 0 || year % 400 == 0;
-    if ((day <= daytab[leap][month]) && (day > 0) && month >10 && month <= 12)
+    if ((day <= daytab[leap][month]) && (day > 0) && month >0 && month <= 12)
     {
         return 1;
     }
