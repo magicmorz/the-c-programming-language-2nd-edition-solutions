@@ -79,30 +79,29 @@ int main(int argc, char const *argv[])
     char s[MAXOP];
 
     char input_line[MAXVAL];
-    int original_argc= argc;
-    for (int i = 0, m=0; --argc > 0; i++)
+    int i = 0;
+    int original_argc = argc;
+    for (int m = 0; --argc > 0; m++)
     {
-        for (int j = 0; ((m+1)<original_argc)&&(argv[m+1][j] != '\0'); j++)
+        for (int j = 0; ((m + 1) < original_argc) && (argv[m + 1][j] != '\0'); j++, i++)
         {
-            input_line[i+j] = argv [m+1][j]; 
-            i++;
-            m++;
+            input_line[i] = argv[m + 1][j];
         }
-        input_line[i]= ' ';
-        
+        input_line[i++] = ' ';
     }
 
-    
+    input_line[--i] = '\n';
+    input_line[++i] = '\0';
 
-        int j = 0;
-        for (int i = 0; input_line[i] != '\0'; i++)
+    int j = 0;
+    for (int i = 0; input_line[i] != '\0'; i++)
+    {
+        while ((input_line[i] == ' ' || (input_line[i] == '\t')))
         {
-            while ((input_line[i] == ' ' || (input_line[i] == '\t')))
-            {
-                i++;
-            }
-            s[j] = input_line[i];
-            s[++j] = '\0';
+            i++;
+        }
+        s[j] = input_line[i];
+        s[++j] = '\0';
 
             if (!isdigit(input_line[i]) && input_line[i] != '.' && input_line[i] != '-' && !isalpha(input_line[i]))
             {
