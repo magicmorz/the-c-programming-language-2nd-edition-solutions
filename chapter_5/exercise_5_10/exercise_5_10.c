@@ -79,160 +79,158 @@ int main(int argc, char const *argv[])
     char s[MAXOP];
 
     char input_line[MAXVAL];
-    int original_argc= argc;
-    for (int i = 0, m=0; --argc > 0; i++)
+    int i = 0;
+    int original_argc = argc;
+    for (int m = 0; --argc > 0; m++)
     {
-        for (int j = 0; ((m+1)<original_argc)&&(argv[m+1][j] != '\0'); j++)
+        for (int j = 0; ((m + 1) < original_argc) && (argv[m + 1][j] != '\0'); j++, i++)
         {
-            input_line[i+j] = argv [m+1][j]; 
-            i++;
-            m++;
+            input_line[i] = argv[m + 1][j];
         }
-        input_line[i]= ' ';
-        
+        input_line[i++] = ' ';
     }
 
-    
+    input_line[--i] = '\n';
+    input_line[++i] = '\0';
 
-        int j = 0;
-        for (int i = 0; input_line[i] != '\0'; i++)
+    int j = 0;
+    for (int i = 0; input_line[i] != '\0'; i++)
+    {
+        while ((input_line[i] == ' ' || (input_line[i] == '\t')))
         {
-            while ((input_line[i] == ' ' || (input_line[i] == '\t')))
-            {
-                i++;
-            }
-            s[j] = input_line[i];
-            s[++j] = '\0';
+            i++;
+        }
+        s[j] = input_line[i];
+        s[++j] = '\0';
 
-            if (!isdigit(input_line[i]) && input_line[i] != '.' && input_line[i] != '-' && !isalpha(input_line[i]))
+        if (!isdigit(input_line[i]) && input_line[i] != '.' && input_line[i] != '-' && !isalpha(input_line[i]))
+        {
+            switch (input_line[i])
             {
-                switch (input_line[i])
+            case '+':
+                push(pop() + pop());
+                j = 0;
+                continue;
+            case '*':
+                push(pop() * pop());
+                j = 0;
+                continue;
+            case '/':
+                if (op2 != 0.0)
                 {
-                case '+':
-                    push(pop() + pop());
-                    j = 0;
-                    continue;
-                case '*':
-                    push(pop() * pop());
-                    j = 0;
-                    continue;
-                case '/':
-                    if (op2 != 0.0)
-                    {
-                        op2 = pop();
-                        push(pop() / op2);
-                        j = 0;
-                    }
-                    else
-                        printf("error: zero divisor\n");
-                    continue;
-
-                case '%':
                     op2 = pop();
-                    if (op2 != 0.0)
-                    {
-                        push((int)pop() % (int)op2);
-                        j = 0;
-                    }
-                    else
-                        printf("error: zero divisor\n");
-                    continue;
-                case '^':
-                    op2 = pop();
-                    push(pow(pop(), op2));
+                    push(pop() / op2);
                     j = 0;
-                    continue;
-
-                case '~':
-                    push(sin(pop()));
-                    j = 0;
-                    continue;
-                case '\n':
-                    last_printed_value = top();
-                    printf("\t%.8g\n", pop());
-                    j = 0;
-                    continue;
-                }
-            }
-
-            if (input_line[i] == '-') // if minus
-            {
-                // s[j++] = input_line[i];
-                if (!isdigit(input_line[i + 1]))
-                {
-
-                    op2 = pop();
-                    op1 = pop();
-                    push(op1 - op2);
-                    j = 0;
-                    continue;
                 }
                 else
-                    s[j++] = input_line[++i];
-            }
+                    printf("error: zero divisor\n");
+                continue;
 
-            if (isalpha(input_line[i])) // if variable
-            {
-                while (isalpha(input_line[i + 1]))
+            case '%':
+                op2 = pop();
+                if (op2 != 0.0)
                 {
-                    i++;
-                    s[j++] = input_line[i];
-                }
-                s[j] = '\0';
-                if (strcmp(s, "top") == 0)
-                {
-                    printf("%f\n", top());
+                    push((int)pop() % (int)op2);
                     j = 0;
-                    continue;
                 }
-                if (strcmp(s, "swap") == 0)
-                {
-                    swap_top_two();
-                    j = 0;
-                    continue;
-                }
-                if (strcmp(s, "e") == 0)
-                {
-                    push(exp(pop()));
-                    j = 0;
-                    continue;
-                }
-                if (strcmp(s, "last") == 0)
-                {
-                    push(last_printed_value);
-                    j = 0;
-                    continue;
-                }
-                if (strcmp(s, "clear") == 0)
-                {
-                    for (int i = 0; i < MAXVAL; val[i] = ' ', i++)
-                        ;
-                    j = 0;
-                    continue;
-                }
-            }
-            if (isdigit(input_line[i]))
-            {
-                while (isdigit(input_line[i + 1]))
-                {
-                    i++;
-                    s[j++] = input_line[i];
-                }
-            }
-            if (input_line[i] == '.')
-            {
-                while (isdigit(input_line[i + 1]))
-                {
-                    i++;
+                else
+                    printf("error: zero divisor\n");
+                continue;
+            case '^':
+                op2 = pop();
+                push(pow(pop(), op2));
+                j = 0;
+                continue;
 
-                    s[j++] = input_line[i];
-                }
+            case '~':
+                push(sin(pop()));
+                j = 0;
+                continue;
+            case '\n':
+                last_printed_value = top();
+                printf("\t%.8g\n", pop());
+                j = 0;
+                continue;
+            }
+        }
+
+        if (input_line[i] == '-') // if minus
+        {
+            // s[j++] = input_line[i];
+            if (!isdigit(input_line[i + 1]))
+            {
+
+                op2 = pop();
+                op1 = pop();
+                push(op1 - op2);
+                j = 0;
+                continue;
+            }
+            else
+                s[j++] = input_line[++i];
+        }
+
+        if (isalpha(input_line[i])) // if variable
+        {
+            while (isalpha(input_line[i + 1]))
+            {
+                i++;
+                s[j++] = input_line[i];
             }
             s[j] = '\0';
-            printf("%s\n", s);
-            push(atof(s));
-            j = 0;
-        
+            if (strcmp(s, "top") == 0)
+            {
+                printf("%f\n", top());
+                j = 0;
+                continue;
+            }
+            if (strcmp(s, "swap") == 0)
+            {
+                swap_top_two();
+                j = 0;
+                continue;
+            }
+            if (strcmp(s, "e") == 0)
+            {
+                push(exp(pop()));
+                j = 0;
+                continue;
+            }
+            if (strcmp(s, "last") == 0)
+            {
+                push(last_printed_value);
+                j = 0;
+                continue;
+            }
+            if (strcmp(s, "clear") == 0)
+            {
+                for (int i = 0; i < MAXVAL; val[i] = ' ', i++)
+                    ;
+                j = 0;
+                continue;
+            }
+        }
+        if (isdigit(input_line[i]))
+        {
+            while (isdigit(input_line[i + 1]))
+            {
+                i++;
+                s[j++] = input_line[i];
+            }
+        }
+        if (input_line[i] == '.')
+        {
+            while (isdigit(input_line[i + 1]))
+            {
+                i++;
+
+                s[j++] = input_line[i];
+            }
+        }
+        s[j] = '\0';
+        printf("%s\n", s);
+        push(atof(s));
+        j = 0;
     }
 
     return 0;
