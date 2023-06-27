@@ -11,31 +11,39 @@ void detab(int argc, char const *argv[])
     int startposition = 0;
     int duplicate_argc = argc;
     int c;
+    int start = 0;
+    int num = TAB_SIZE_IN_SPACES;
 
-    while (--duplicate_argc > 0 && (*++argv)[0] == '-')
-    {
-        while (c = *++argv[0])
+    
+        while ((duplicate_argc-- > 0)&&(c = *(argv[0])))
         {
-            switch (c)
+            if (c == '-')
             {
-            case /* constant-expression */:
-                /* code */
-                break;
-            
-            default:
-                break;
+                
+                start = atoi(*argv);
+                if (start<0)
+                {
+                    start *= -1;
+                }
+                
             }
+            else if (c == '+')
+            {
+                num = atoi(*argv);
+            }
+            argv++;
         }
-        
-    }
+    
 
-    if (argc > 1)
+    if (start > 0)
     {
+        int i = 0;
         while ((c = getchar()) != EOF)
         {
-            if (c == '\t')
+            i++;
+            if (c == '\t' && i >= start)
             {
-                for (int i = 0; i < atoi(*(argv + 1)); i++)
+                for (int i = 0; i < num; i++)
                 {
                     printf(" ");
                 }
@@ -52,7 +60,7 @@ void detab(int argc, char const *argv[])
         {
             if (c == '\t')
             {
-                for (int i = 0; i < TAB_SIZE_IN_SPACES; i++)
+                for (int i = 0; i < num; i++)
                 {
                     printf(" ");
                 }
