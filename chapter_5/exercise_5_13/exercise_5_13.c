@@ -1,58 +1,41 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MAXLEN 100
+#include <string.h>
+int get_line(char s[]);
 
-int main() {
-    int i =0;
-    char s[MAXLEN];
-    // Allocate memory for the array of pointers
-    char** strings = (char**)malloc(sizeof(char*));
-    char** new_strings = (char**)realloc(strings, sizeof(char*));
-    while (get_line(s)!=-1)
+int main(int argc, char const *argv[])
+{
+    int n = 3;
+    if (argc > 1)
     {
-      i++;
-      new_strings = (char**)realloc(new_strings, i* sizeof(char*));
-      strcpy(new_strings[i], &s);
-      
-    }
-    
-
-
-
-
-    // Allocate memory for each string and assign it to the array
-    strings[0] = (char*)malloc(6 * sizeof(char));
-    strings[1] = (char*)malloc(6 * sizeof(char));
-    strings[2] = (char*)malloc(7 * sizeof(char));
-
-    // Check if the memory allocation for strings was successful
-    if (strings[0] == NULL || strings[1] == NULL || strings[2] == NULL) {
-        printf("Memory allocation failed.\n");
-
-        // Free previously allocated memory
-        free(strings[0]);
-        free(strings[1]);
-        free(strings[2]);
-        free(strings);
-
-        return 1;
+        n = atoi(argv[1]) * -1;
     }
 
-    // Initialize the strings
-    strcpy(strings[0], "Hello");
-    strcpy(strings[1], "World");
-    strcpy(strings[2], "OpenAI");
+    char **pointer_array;
+    pointer_array = (char **)malloc(sizeof(char *));
 
-    // Access and print the strings
-    for (int i = 0; i < 3; i++) {
-        printf("%s\n", strings[i]);
+    int i = 0;
+    int len = 1;
+    char s[40];
+
+    while (get_line(s) != -1)
+    {
+        pointer_array = (char **)realloc(pointer_array, (++len) * sizeof(char *));
+        pointer_array[i] = (char *)malloc(strlen(s) + 1);
+        strcpy(pointer_array[i], s);
+        i++;
     }
-
-    // Free allocated memory
-    free(strings[0]);
-    free(strings[1]);
-    free(strings[2]);
-    free(strings);
+    if (len-1 < n)
+    {
+        printf("too short\n");
+    }
+    else
+    {
+        for (int i = len - n - 1; i < len - 1; i++)
+        {
+            printf("%s", *(pointer_array + i));
+        }
+    }
 
     return 0;
 }
@@ -71,4 +54,5 @@ int get_line(char s[])
     }
     s[i] = '\n';
     s[i + 1] = '\0';
+    return i + 1;
 }
