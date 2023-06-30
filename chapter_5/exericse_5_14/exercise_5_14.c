@@ -1,74 +1,76 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-
+#include <stdbool.h>
 #define MAXLINES 5000
 char *lineptr[MAXLINES];
 
 int readlines(char *lineptr[], int nlines);
 void writelines(char *lineptr[], int nlines);
-double atof(const char* str);
+double atof(const char *str);
 void qsort(void *lineptr[], int left, int right,
-			int (*comp)(void *, void *), int reverse);
+		   int (*comp)(void *, void *), int reverse);
 
 int numcmp(char *s1, char *s2);
+bool isCharInArray(char character, const char *array[], int size);
 
 main(int argc, char *argv[])
 {
 	int nlines;
 	int numeric = 0;
 	int reverse = 0;
+	int f_option = false;
 
-	if (argc > 1 && strcmp(argv[1], "-n") == 0)
+	if (isCharInArray('n', argv + 1, argc - 1))
+	{
 		numeric = 1;
-	else if (argc > 1 && strcmp(argv[1], "-r") == 0)
+	}
+	if (isCharInArray('r', argv + 1, argc - 1))
 	{
 		reverse = 1;
 	}
-	else if (argc > 1 && strcmp(argv[1], "-rn") == 0)
+	if (isCharInArray('f', argv + 1, argc - 1))
 	{
-		reverse = 1;
-		numeric = 1;
-	}
-	else if (argc > 1 && strcmp(argv[1], "-rn") == 0)
-	{
-		reverse = 1;
-		numeric = 1;
+		f_option = true;
 	}
 
-	if (argc > 2 && strcmp(argv[2], "-r") == 0)
-		reverse = 1;
-	
-		
-	if ((nlines = readlines(lineptr, MAXLINES)) >= 0) {
-		qsort((void **) lineptr, 0, nlines-1,
-			(int (*)(void*, void*))(numeric ? numcmp : strcmp), reverse);
+	if ((nlines = readlines(lineptr, MAXLINES)) >= 0)
+	{
+		if (f_option)
+		{
+			convertStringToUppercase(lineptr);
+		}
+
+		qsort((void **)lineptr, 0, nlines - 1,
+			  (int (*)(void *, void *))(numeric ? numcmp : strcmp), reverse);
 		writelines(lineptr, nlines);
 		return 0;
-	} else {
+	}
+	else
+	{
 		printf("input too big to sort\n");
 		return 1;
 	}
 }
 
 void qsort(void *v[], int left, int right,
-			int (*comp)(void *, void *), int reverse)
+		   int (*comp)(void *, void *), int reverse)
 {
 	int i, last;
 	void swap(void *v[], int, int);
 
 	if (left >= right)
 		return;
-	swap(v, left, (left + right)/2);
+	swap(v, left, (left + right) / 2);
 	last = left;
-	for (i = left+1; i <= right; i++)
-		if ((reverse==0)?((*comp)(v[i], v[left]) < 0):((*comp)(v[i], v[left]) > 0))
+	for (i = left + 1; i <= right; i++)
+		if ((reverse == 0) ? ((*comp)(v[i], v[left]) < 0) : ((*comp)(v[i], v[left]) > 0))
 			swap(v, ++last, i);
-		/**if ((*comp)(v[i], v[left]) < 0)
-			swap(v, ++last, i);*/
+	/**if ((*comp)(v[i], v[left]) < 0)
+		swap(v, ++last, i);*/
 	swap(v, left, last);
-	qsort(v, left, last-1, comp, reverse);
-	qsort(v, last+1, right, comp, reverse);
+	qsort(v, left, last - 1, comp, reverse);
+	qsort(v, last + 1, right, comp, reverse);
 }
 
 void swap(void *v[], int i, int j)
@@ -105,8 +107,9 @@ int readlines(char *lineptr[], int maxlines)
 	while ((len = mygetline(line, MAXLEN)) > 0)
 		if (nlines >= maxlines || (p = alloc(len)) == NULL)
 			return -1;
-		else {
-			line[len-1] = '\0';
+		else
+		{
+			line[len - 1] = '\0';
 			strcpy(p, line);
 			lineptr[nlines++] = p;
 		}
@@ -141,10 +144,12 @@ static char *allocp = allocbuf;
 
 char *alloc(int n)
 {
-	if (allocbuf + ALLOCSIZE - allocp >= n) {
+	if (allocbuf + ALLOCSIZE - allocp >= n)
+	{
 		allocp += n;
 		return allocp - n;
-	} else
+	}
+	else
 		return 0;
 }
 
@@ -153,64 +158,97 @@ void afree(char *p)
 	if (p >= allocbuf && p < allocbuf + ALLOCSIZE)
 		allocp = p;
 }
-double atof(const char* str) {
-    double result = 0.0;
-    double sign = 1.0;
-    int exponent = 0;
-    int i = 0;
+double atof(const char *str)
+{
+	double result = 0.0;
+	double sign = 1.0;
+	int exponent = 0;
+	int i = 0;
 
-    // Skip leading whitespace
-    while (isspace(str[i]))
-        i++;
+	// Skip leading whitespace
+	while (isspace(str[i]))
+		i++;
 
-    // Handle optional sign
-    if (str[i] == '-' || str[i] == '+') {
-        if (str[i] == '-')
-            sign = -1.0;
-        i++;
-    }
+	// Handle optional sign
+	if (str[i] == '-' || str[i] == '+')
+	{
+		if (str[i] == '-')
+			sign = -1.0;
+		i++;
+	}
 
-    // Process digits before the decimal point
-    while (isdigit(str[i])) {
-        result = result * 10.0 + (str[i] - '0');
-        i++;
-    }
+	// Process digits before the decimal point
+	while (isdigit(str[i]))
+	{
+		result = result * 10.0 + (str[i] - '0');
+		i++;
+	}
 
-    // Process the decimal point and digits after it
-    if (str[i] == '.')
-    {
-        i++;
-        double factor = 0.1;
-        while (isdigit(str[i])) {
-            result = result + (str[i] - '0') * factor;
-            factor *= 0.1;
-            i++;
-        }
-    }
+	// Process the decimal point and digits after it
+	if (str[i] == '.')
+	{
+		i++;
+		double factor = 0.1;
+		while (isdigit(str[i]))
+		{
+			result = result + (str[i] - '0') * factor;
+			factor *= 0.1;
+			i++;
+		}
+	}
 
-    // Process the optional exponent part
-    if (str[i] == 'e' || str[i] == 'E') {
-        i++;
-        int expSign = (str[i] == '-') ? -1 : 1;
-        if (str[i] == '-' || str[i] == '+')
-            i++;
-        while (isdigit(str[i])) {
-            exponent = exponent * 10 + (str[i] - '0');
-            i++;
-        }
-        exponent *= expSign;
-    }
+	// Process the optional exponent part
+	if (str[i] == 'e' || str[i] == 'E')
+	{
+		i++;
+		int expSign = (str[i] == '-') ? -1 : 1;
+		if (str[i] == '-' || str[i] == '+')
+			i++;
+		while (isdigit(str[i]))
+		{
+			exponent = exponent * 10 + (str[i] - '0');
+			i++;
+		}
+		exponent *= expSign;
+	}
 
-    // Apply the sign and exponent to the result
-    result *= sign;
-    while (exponent > 0) {
-        result *= 10.0;
-        exponent--;
-    }
-    while (exponent < 0) {
-        result *= 0.1;
-        exponent++;
-    }
+	// Apply the sign and exponent to the result
+	result *= sign;
+	while (exponent > 0)
+	{
+		result *= 10.0;
+		exponent--;
+	}
+	while (exponent < 0)
+	{
+		result *= 0.1;
+		exponent++;
+	}
 
-    return result;
+	return result;
+}
+bool isCharInArray(char character, const char *array[], int size)
+{
+	for (int i = 0; i < size; i++)
+	{
+		if (strchr(array[i], character) != NULL)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+void convertStringToUppercase(char *str[])
+{
+	char * pt;
+	while (*str)
+	{
+		pt = *str;
+		while (*pt)
+		{
+			*pt = toupper(*pt);
+			pt++;
+		}
+		*str++;
+	}
 }
