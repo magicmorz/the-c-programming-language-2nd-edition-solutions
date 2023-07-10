@@ -5,6 +5,7 @@
         "label": "build",
         "type": "shell",
         "command": "gcc",
+
         "args": [
           "-g",
           "${file}",
