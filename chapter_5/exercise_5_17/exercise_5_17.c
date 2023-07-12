@@ -78,7 +78,7 @@ int parse_arg_list(int argc, char *argv[])
             // Process the argument starting with '-'
             for (size_t j = 1; j < arg_len; ++j)
             {
-                if (isdigit(argv[i][j]) && !fields_options[i - 1][INDEX])
+                 if (isdigit(argv[i][j]) && !fields_options[i - 1][INDEX])
                 {
                     // Process field index
                     char field_index_str[INT_MAX_NR_OF_DIGITS];
@@ -299,40 +299,54 @@ int estrcmp(const char *s1, const char *s2)
 }
 
 // Field-based comparison function
+// Field-based comparison function
 int fieldscmp(const char *s1, const char *s2)
 {
     int i = 0;
     while (i < nr_of_fields)
     {
+        // Get the start position of the field in s1
         size_t start_s1 = str_nth_blank_pos(s1, fields_options[i][INDEX] - 1);
+        // Get the end position of the field in s1
         size_t end_s1 = str_nth_blank_pos(s1, fields_options[i][INDEX]);
+        // Extract the field from s1 using start and end positions
         char *field_s1 = substr(s1, start_s1, end_s1);
 
+        // Get the start position of the field in s2
         size_t start_s2 = str_nth_blank_pos(s2, fields_options[i][INDEX] - 1);
+        // Get the end position of the field in s2
         size_t end_s2 = str_nth_blank_pos(s2, fields_options[i][INDEX]);
+        // Extract the field from s2 using start and end positions
         char *field_s2 = substr(s2, start_s2, end_s2);
 
+        // Set the comparison function for the field
         comp = fields_comp[i];
+        // Set the sorting order for the field
         order = fields_options[i][ORDER];
+        // Set the case-insensitivity flag for the field
         fold = fields_options[i][FOLD];
+        // Set the directory comparison flag for the field
         directory = fields_options[i][DIRECTORY];
 
+        // Compare the extracted fields using the specified options
         int comp_result = comp(field_s1, field_s2);
 
+        // Free the memory allocated for field_s1
         free(field_s1);
+        // Free the memory allocated for field_s2
         free(field_s2);
 
         if (comp_result == 0)
         {
-            ++i;
+            ++i; // Move to the next field if the current fields are equal
         }
         else
         {
-            return comp_result;
+            return comp_result; // Return the comparison result if the fields are not equal
         }
     }
 
-    return 0;
+    return 0; // All fields are equal, return 0
 }
 
 // Swaps two elements in an array

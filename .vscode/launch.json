@@ -7,7 +7,7 @@
         "request": "launch",
         "program": "${fileDirname}/${fileBasenameNoExtension}.exe",
         //"args": ["-3nr", "-2f", "<", "file_in.txt"],
-        "args": ["-3nr", "-2f", "<file_in.txt"],
+        "args": ["-3nr", "-2f"],
         "stopAtEntry": false,
         "cwd": "${fileDirname}",
         "environment": [],
