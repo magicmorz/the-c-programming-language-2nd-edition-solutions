@@ -153,6 +153,7 @@ int parse_arg_list(int argc, char *argv[])
     // Set the comparison function based on the parsed options
     if (nr_of_fields && nr_of_fields == argc - 1)
     {
+        // compare using fields
         comp = fieldscmp;
     }
     else if (argc > 2)
@@ -298,7 +299,6 @@ int estrcmp(const char *s1, const char *s2)
     return 0;
 }
 
-// Field-based comparison function
 // Field-based comparison function
 int fieldscmp(const char *s1, const char *s2)
 {
