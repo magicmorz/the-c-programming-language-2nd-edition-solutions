@@ -7,7 +7,6 @@
 
 #define MAX_NR_OF_LINES 5000
 #define MAX_LINE_LEN 1000
-#define ALLOC_SIZE 10000
 #define MAX_NR_OF_FIELDS 100
 #define MAX_NR_OF_FIELD_OPTIONS 4
 #define INT_MAX_NR_OF_DIGITS (size_t)(floor(log10(labs(INT_MAX))) + 1)
@@ -22,12 +21,11 @@ enum field_option
 };
 
 // Function prototypes
-size_t get_line(char line[], size_t max_line_len);
 int parse_arg_list(int argc, char *argv[]);
 size_t str_nth_blank_pos(const char *s, size_t n);
 char *substr(const char *s, size_t start, size_t end);
-size_t read_lines(char *line_ptr[], const size_t max_nr_of_lines);
-void write_lines(char *line_ptr[], const size_t nr_of_lines);
+size_t read_lines(char *line_ptr[], const size_t max_num_of_lines);
+void write_lines(char *line_ptr[], const size_t num_of_lines);
 int numcmp(const char *s1, const char *s2);
 int estrcmp(const char *s1, const char *s2);
 int fieldscmp(const char *s1, const char *s2);
@@ -40,109 +38,47 @@ int fold = 0;      // 0 case-sensitive, 1 case-insensitive
 int directory = 0; // 0 normal, 1 directory
 int (*comp)(const char *, const char *) = estrcmp;
 
-int nr_of_fields = 0;
+int num_of_fields = 0;
 int (*fields_comp[MAX_NR_OF_FIELDS])(const char *, const char *);
 int fields_options[MAX_NR_OF_FIELDS][MAX_NR_OF_FIELD_OPTIONS];
-
-// Reads a line of input from stdin
-size_t get_line(char line[], size_t max_line_len)
-{
-    int c;
-    size_t i;
-
-    for (i = 0; i < max_line_len - 1 && (c = getc(stdin)) != EOF && c != '\n'; ++i)
-    {
-        line[i] = c;
-    }
-
-    if (c == '\n')
-    {
-        line[i] = c;
-        ++i;
-    }
-
-    line[i] = '\0';
-
-    return i;
-}
 
 // Parses command-line arguments and sets the appropriate options
 int parse_arg_list(int argc, char *argv[])
 {
-    // Iterate through the command-line arguments
     for (int i = 1; i < argc; ++i)
     {
-        size_t arg_len = strlen(argv[i]);
-        if (arg_len > 1 && argv[i][0] == '-')
+        if (argv[i][0] == '-')
         {
-            // Process the argument starting with '-'
-            for (size_t j = 1; j < arg_len; ++j)
+            for (size_t j = 1; argv[i][j]; ++j)
             {
-                 if (isdigit(argv[i][j]) && !fields_options[i - 1][INDEX])
+                if (isdigit(argv[i][j]) && !fields_options[i - 1][INDEX])
                 {
-                    // Process field index
-                    char field_index_str[INT_MAX_NR_OF_DIGITS];
-
-                    size_t k = 0;
-                    // Extract the field index as a string
-                    while (isdigit(argv[i][j]) && j < arg_len && k < INT_MAX_NR_OF_DIGITS)
-                    {
-                        field_index_str[k++] = argv[i][j++];
-                    }
-                    field_index_str[k] = '\0';
-
-                    fields_options[i - 1][INDEX] = atoi(field_index_str);
-
-                    --j;
-                    ++nr_of_fields;
+                    fields_options[i - 1][INDEX] = atoi(&argv[i][j]);
+                    ++num_of_fields;
+                    break;
                 }
-                else
+
+                switch (argv[i][j])
                 {
-                    // Process the character options
-                    switch (argv[i][j])
-                    {
-                    case 'n':
-                        comp = numcmp; // Numeric comparison
-                        break;
-
-                    case 'f':
-                        fold = 1; // Case-insensitive comparison
-                        break;
-
-                    case 'd':
-                        directory = 1; // Directory comparison
-                        break;
-
-                    case 'r':
-                        order = -1; // Descending order
-                        break;
-
-                    default:
-                        return 0; // Invalid option
-                        break;
-                    }
+                case 'n':
+                    fields_comp[i - 1] = numcmp;
+                    break;
+                case 'f':
+                    fields_options[i - 1][FOLD] = 1;
+                    break;
+                case 'd':
+                    fields_options[i - 1][DIRECTORY] = 1;
+                    break;
+                case 'r':
+                    fields_options[i - 1][ORDER] = -1;
+                    break;
+                default:
+                    return 0; // Invalid option
                 }
             }
 
-            // If fields are specified, set the corresponding options
-            if (nr_of_fields || argc > 2)
-            {
-                if (!fields_options[i - 1][INDEX])
-                {
-                    return 0; // Missing field index
-                }
-
-                fields_comp[i - 1] = comp;
-                fields_options[i - 1][ORDER] = order;
-                fields_options[i - 1][FOLD] = fold;
-                fields_options[i - 1][DIRECTORY] = directory;
-
-                // Reset options for the next field
-                comp = estrcmp;
-                order = 1;
-                fold = 0;
-                directory = 0;
-            }
+            if ((num_of_fields || argc > 2) && !fields_options[i - 1][INDEX])
+                return 0; // Missing field index
         }
         else
         {
@@ -150,17 +86,10 @@ int parse_arg_list(int argc, char *argv[])
         }
     }
 
-    // Set the comparison function based on the parsed options
-    if (nr_of_fields && nr_of_fields == argc - 1)
-    {
-        // compare using fields
-        comp = fieldscmp;
-    }
-    else if (argc > 2)
-    {
+    if (num_of_fields && num_of_fields != argc - 1)
         return 0; // Invalid argument count
-    }
 
+    comp = (num_of_fields) ? fieldscmp : estrcmp;
     return 1; // Successful parsing
 }
 
@@ -168,15 +97,18 @@ int parse_arg_list(int argc, char *argv[])
 size_t str_nth_blank_pos(const char *s, size_t n)
 {
     size_t pos = 0;
+
     while (n && *s != '\0')
     {
-        if (*s == ' ' || *s == '\t')
+        if (isspace(*s))
         {
-            do
+            ++pos;
+
+            // Skip consecutive whitespace characters
+            while (isspace(*s))
             {
-                ++pos;
                 ++s;
-            } while (*s == ' ' || *s == '\t');
+            }
 
             --n;
         }
@@ -193,56 +125,66 @@ size_t str_nth_blank_pos(const char *s, size_t n)
 // Extracts a substring from a string
 char *substr(const char *s, size_t start, size_t end)
 {
-    if (start > end)
+    if (start > end || s == NULL)
     {
-        return NULL;
+        return NULL; // Invalid input or NULL string, return NULL
     }
 
     const size_t len = end - start;
-    char *dest = (char *)malloc(len + 1);
+    char *dest = malloc(len + 1); // Allocate memory for the destination string
 
-    for (size_t i = start; i < end && s[i] != '\0'; ++i)
+    if (dest == NULL)
     {
-        *dest = s[i];
-        ++dest;
+        return NULL; // Memory allocation failed, return NULL
     }
-    *dest = '\0';
 
-    return dest - len;
+    strncpy(dest, s + start, len); // Copy the substring from source to destination
+    dest[len] = '\0'; // Add null-terminating character at the end of the destination string
+
+    return dest; // Return the extracted substring
 }
 
+
+
 // Reads lines of input and stores them in line_ptr array
-size_t read_lines(char *line_ptr[], const size_t max_nr_of_lines)
+size_t read_lines(char *line_ptr[], const size_t max_num_of_lines)
 {
-    size_t line_length;
-    size_t nr_of_lines = 0;
+    size_t num_of_lines = 0;
+    char line[MAX_LINE_LEN];
 
-    char *current_line = (char *)malloc(MAX_LINE_LEN);
-    char *current_line_copy = NULL;
-
-    while ((line_length = get_line(current_line, MAX_LINE_LEN)))
+    // Read lines until the maximum number of lines is reached or input ends
+    while (num_of_lines < max_num_of_lines && fgets(line, sizeof(line), stdin))
     {
-        if (nr_of_lines >= max_nr_of_lines || (current_line_copy = (char *)malloc(line_length)) == NULL)
+        // Remove the newline character at the end of the line, if present
+        size_t line_length = strlen(line);
+        if (line_length > 0 && line[line_length - 1] == '\n')
         {
+            line[line_length - 1] = '\0';
+            --line_length;
+        }
+
+        // Allocate memory for the line copy
+        char *current_line_copy = malloc(line_length + 1);
+        if (current_line_copy == NULL)
+        {
+            // Memory allocation failed
             return -1;
         }
-        else
-        {
-            current_line[line_length - 1] = '\0';
-            strcpy(current_line_copy, current_line);
-            line_ptr[nr_of_lines++] = current_line_copy;
-        }
+
+        // Copy the line to the allocated memory
+        strcpy(current_line_copy, line);
+
+        // Store the line copy in the line_ptr array
+        line_ptr[num_of_lines++] = current_line_copy;
     }
 
-    free(current_line);
-
-    return nr_of_lines;
+    return num_of_lines;
 }
 
 // Writes lines to stdout
-void write_lines(char *line_ptr[], const size_t nr_of_lines)
+void write_lines(char *line_ptr[], const size_t num_of_lines)
 {
-    for (size_t i = 0; i < nr_of_lines; ++i)
+    for (size_t i = 0; i < num_of_lines; ++i)
     {
         puts(line_ptr[i]);
         free(line_ptr[i]);
@@ -252,80 +194,69 @@ void write_lines(char *line_ptr[], const size_t nr_of_lines)
 // Numeric comparison function
 int numcmp(const char *s1, const char *s2)
 {
+    // Convert the input strings to double values
     double nr1 = atof(s1);
     double nr2 = atof(s2);
 
-    if (nr1 < nr2)
-    {
-        return order * -1;
-    }
-    else if (nr1 > nr2)
-    {
-        return order * 1;
-    }
-
-    return 0;
+    // Compare the numeric values
+    // Return -1 if nr1 is less than nr2, 1 if nr1 is greater than nr2, and 0 if they are equal
+    return order * ((nr1 > nr2) - (nr1 < nr2));
 }
 
 // Case-insensitive string comparison function
 int estrcmp(const char *s1, const char *s2)
 {
-    while (*s1 != '\0' && *s2 != '\0')
+    while (*s1 && *s2)
     {
         if (directory)
         {
-            while (*s1 != '\0' && !isalnum(*s1) && !isspace(*s1))
-            {
+            // Skip non-alphanumeric and non-whitespace characters in directory comparison
+            while (*s1 && !isalnum(*s1) && !isspace(*s1))
                 ++s1;
-            }
-            while (*s2 != '\0' && !isalnum(*s2) && !isspace(*s2))
-            {
+            while (*s2 && !isalnum(*s2) && !isspace(*s2))
                 ++s2;
-            }
         }
 
-        int result = fold ? tolower(*s1) - tolower(*s2) : *s1 - *s2;
-        if (result == 0)
-        {
-            ++s1;
-            ++s2;
-        }
-        else
-        {
+        // Perform the comparison, taking into account case-folding option
+        int result = fold ? tolower((unsigned char)*s1) - tolower((unsigned char)*s2) : *s1 - *s2;
+
+        if (result != 0)
             return order * result;
-        }
+
+        // Move to the next characters in both strings
+        ++s1;
+        ++s2;
     }
 
+    // Reached the end of one or both strings, consider them equal
     return 0;
 }
-
 // Field-based comparison function
 int fieldscmp(const char *s1, const char *s2)
 {
     int i = 0;
-    while (i < nr_of_fields)
+
+    // Iterate through each field to compare
+    while (i < num_of_fields)
     {
-        // Get the start position of the field in s1
+        // Get the start and end positions of the current field in s1
         size_t start_s1 = str_nth_blank_pos(s1, fields_options[i][INDEX] - 1);
-        // Get the end position of the field in s1
         size_t end_s1 = str_nth_blank_pos(s1, fields_options[i][INDEX]);
-        // Extract the field from s1 using start and end positions
+
+        // Extract the current field from s1
         char *field_s1 = substr(s1, start_s1, end_s1);
 
-        // Get the start position of the field in s2
+        // Get the start and end positions of the current field in s2
         size_t start_s2 = str_nth_blank_pos(s2, fields_options[i][INDEX] - 1);
-        // Get the end position of the field in s2
         size_t end_s2 = str_nth_blank_pos(s2, fields_options[i][INDEX]);
-        // Extract the field from s2 using start and end positions
+
+        // Extract the current field from s2
         char *field_s2 = substr(s2, start_s2, end_s2);
 
-        // Set the comparison function for the field
+        // Set the comparison function, sorting order, case-insensitivity, and directory comparison flag for the current field
         comp = fields_comp[i];
-        // Set the sorting order for the field
         order = fields_options[i][ORDER];
-        // Set the case-insensitivity flag for the field
         fold = fields_options[i][FOLD];
-        // Set the directory comparison flag for the field
         directory = fields_options[i][DIRECTORY];
 
         // Compare the extracted fields using the specified options
@@ -352,8 +283,7 @@ int fieldscmp(const char *s1, const char *s2)
 // Swaps two elements in an array
 void swap(void *v[], size_t i, size_t j)
 {
-    void *temp;
-    temp = v[i];
+    void *temp = v[i];
     v[i] = v[j];
     v[j] = temp;
 }
@@ -391,17 +321,17 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    size_t nr_of_lines;
+    size_t num_of_lines;
     char *line_ptr[MAX_NR_OF_LINES];
 
     // Read lines from input
-    if ((nr_of_lines = read_lines(line_ptr, MAX_NR_OF_LINES)) != -1)
+    if ((num_of_lines = read_lines(line_ptr, MAX_NR_OF_LINES)) != -1)
     {
         // Perform quicksort on the lines
-        quick_sort((void **)line_ptr, 0, nr_of_lines - 1, (int (*)(void *, void *))comp);
+        quick_sort((void **)line_ptr, 0, num_of_lines - 1, (int (*)(void *, void *))comp);
 
         // Write sorted lines to output
-        write_lines(line_ptr, nr_of_lines);
+        write_lines(line_ptr, num_of_lines);
     }
     else
     {
