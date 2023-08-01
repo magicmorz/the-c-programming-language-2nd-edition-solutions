@@ -16,7 +16,6 @@ struct key
 int getword(char *, int);
 int binsearch(char *, struct key *, int);
 
-// gcc 3.getword.c getch.c
 main()
 {
     int n;
