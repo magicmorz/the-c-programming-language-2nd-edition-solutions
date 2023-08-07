@@ -68,7 +68,7 @@ int getword(char *word, int lim)
     if (isalpha(c) || c == '_' || c == '#')
     {
         for (; --lim > 0; w++)
-            if (!isalnum(*w = getc(stdin))&&*w!= '_')
+            if (!isalnum(*w = getc(stdin)) && *w != '_')
             {
                 ungetc(*w, stdin);
                 break;
@@ -93,9 +93,18 @@ int getword(char *word, int lim)
     }
     else if (c == '/')
     {
-        if ((d = getch()) == '*')
+        if ((d = getc(stdin)) == '*')
         {
-            c = comment();
+            c = block_comment();
+        }
+
+        else
+        {
+            ungetc(d, stdin);
+        }
+        if ((d = getc(stdin)) == '/')
+        {
+            c = line_comment();
         }
         else
         {
@@ -106,12 +115,12 @@ int getword(char *word, int lim)
     {
         return EOF;
     }
-    
+
     *w = '\0';
     return word[0];
 }
 
-int comment(void)
+int block_comment(void)
 {
     int c;
     while ((c = getc(stdin)) != EOF)
@@ -126,6 +135,19 @@ int comment(void)
             {
                 ungetc(c, stdin);
             }
+        }
+    }
+    return c;
+}
+
+int line_comment(void)
+{
+    int c;
+    while ((c = getc(stdin)) != EOF)
+    {
+        if (c == '\n')
+        {
+            break;
         }
     }
     return c;
