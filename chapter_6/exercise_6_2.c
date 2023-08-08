@@ -3,7 +3,8 @@
 #include <string.h>
 
 #define MAXWORD 100
-
+#define MAX_VARS 30
+#define N 2
 struct key
 {
     char *word;
@@ -15,16 +16,29 @@ char *variable_types[] = {"int", "long", "short", "double", "char"};
 
 #define NKEYS (sizeof keytab / sizeof keytab[0])
 
+struct variable_name
+{
+    char name[MAXWORD];
+    char first_n_characters[N + 1];
+    int printed;
+} variable_names[30];
 int getword(char *, int);
 int binsearch(char *, struct key *, int);
-char *variable_names[MAXWORD];
+// char *variable_names[MAXWORD];
 main()
 {
+    for (int i = 0; i < MAX_VARS; i++)
+    {
+        variable_names[i].name[0] = '\0';
+        variable_names[i].first_n_characters[0] = '\0';
+    }
+
     int n;
     char word[MAXWORD];
     int i = 0;
     int c;
     int is_saved_word = 0;
+    int p = 0;
     while (getword(word, MAXWORD) != EOF)
     {
         if (isalpha(word[0]))
@@ -56,18 +70,10 @@ main()
                                     }
                                     if (is_saved_word == 0)
                                     {
-                                        // Allocate memory for each word before copying
-                                        variable_names[i] = (char *)malloc(strlen(word) + 1);
-                                        if (variable_names[i] != NULL)
-                                        {
-                                            strcpy(variable_names[i], word);
-                                            i++;
-                                        }
-                                        else
-                                        {
-                                            // Handle memory allocation failure, e.g., print an error message
-                                            printf("Memory allocation failed for word: %s\n", word);
-                                        }
+                                        strcpy(variable_names[p].name, word);
+                                        strncpy(variable_names[p].first_n_characters, variable_names[p].name, N);
+                                        variable_names[p].first_n_characters[N] = '\0';
+                                        p++;
                                     }
                                 }
                             }
@@ -79,8 +85,32 @@ main()
         }
     }
 
-    for (i = 0; i < MAXWORD; i++)
-        printf("%s\n", variable_names[i]);
+    for (i = 0; i < MAX_VARS; i++)
+        for (int j = 1; j < MAX_VARS; j++)
+        {
+            if (i != j)
+            {
+
+                if (!variable_names[j].printed)
+                {
+                    if (strcmp(variable_names[i].first_n_characters, variable_names[j].first_n_characters) == 0)
+                    {
+                        if (j == 1)
+                        {
+                            if (variable_names[i].name[0] != '\0')
+                            {
+                                puts(variable_names[i].name);
+                            }
+                        }
+                        if (variable_names[i].name[0] != '\0')
+                        {
+                            puts(variable_names[j].name);
+                            variable_names[j].printed = 1;
+                        }
+                    }
+                }
+            }
+        }
 
     return 0;
 }
