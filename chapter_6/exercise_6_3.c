@@ -3,8 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #define FILENAME "myfile.txt"
+#define MAX_WORD_LENGTH 30
 
-int getword(char *, int, FILE *fptr);
+int getword(char *word, int lim, FILE *fptr);
 typedef struct
 {
     char *word;
@@ -41,9 +42,10 @@ int main(int argc, char const *argv[])
         // if not already created, create a word_info object for the word
         // save line number
 
-        char *current_word;
+        char current_word[MAX_WORD_LENGTH];
         int pos;
-        while (getword(current_word,30,fptr)) // loop over each word in the line
+        
+        while (getword(current_word, MAX_WORD_LENGTH, fptr)) // loop over each word in the line
         {
             // if this word already has a word_info object
             if ((pos = check_word_already_in_list(word_list, current_word)) != -1)
