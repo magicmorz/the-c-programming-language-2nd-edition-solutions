@@ -1,4 +1,7 @@
 #include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 #define FILENAME "myfile.txt"
 
 int getword(char *, int);
@@ -13,8 +16,11 @@ int main(int argc, char const *argv[])
 {
     FILE *fptr;
     char *line = NULL;
+    size_t line_length = 0;
+    int line_number = 0;
 
-
+    word_info* word_list = NULL:
+    
     // Open a file in read mode
     fptr = fopen(FILENAME, "r");
 
@@ -23,9 +29,10 @@ int main(int argc, char const *argv[])
         return 1;
     }
 
-    
-    while (/* didn't reach EOF */)
+    int read;
+    while ((read = getline(&line, &line_length, fptr))!= -1)
     {
+        line_number++;
         // get line from file
         // loop over each word in the line
             // if word is not noise 
