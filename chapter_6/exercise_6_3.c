@@ -4,74 +4,118 @@
 #include <string.h>
 #define FILENAME "myfile.txt"
 
-int getword(char *, int);
-
+int getword(char *, int, FILE *fptr);
 typedef struct
 {
     char *word;
     int *lines;
+    int count;
 } word_info;
+
+int check_word_already_in_list(word_info *list, char *word);
 
 int main(int argc, char const *argv[])
 {
-    FILE *fptr;
+
     char *line = NULL;
     size_t line_length = 0;
     int line_number = 0;
+    int size = 1;
+    word_info *word_list = NULL;
+    word_list = (word_info *)malloc(sizeof(word_info) * size);
 
-    word_info* word_list = NULL;
-    word_list = (word_info*)malloc(sizeof(word_info));
     // Open a file in read mode
+    FILE *fptr;
     fptr = fopen(FILENAME, "r");
-
-    if (fptr == NULL) {
+    if (fptr == NULL)
+    {
         perror("Error opening file");
         return 1;
     }
 
     int read;
-    while ((read = getline(&line, &line_length, fptr))!= -1) // get line from file
+    while ((read = getline(&line, &line_length, fptr)) != -1) // get line from file
     {
-        
-        line_number++;
-        for (int i = 0; *(line+i)!='\0'; i++)
-        {
-            putchar(*(line+i));
-        }
-        
+
         // loop over each word in the line
-            // if word is not noise 
-                // if not already created, create a word_info object for the word
+        // if not already created, create a word_info object for the word
+        // save line number
+
+        char *current_word;
+        int pos;
+        while (getword(current_word,30,fptr)) // loop over each word in the line
+        {
+            // if this word already has a word_info object
+            if ((pos = check_word_already_in_list(word_list, current_word)) != -1)
+            {
+                // increament numner of appreances
+                (word_list + pos)->count++;
+                // make space for a new line number
+                (word_list + pos)->lines = (word_info *)realloc(word_list + pos, (word_list + pos)->count);
                 // save line number
+                (word_list + pos)->lines[(word_list + pos)->count] = line_number; // save line number
+            }
+            else // if not already created, create a word_info object for the word
+            {
+                size++;
+                word_list = (word_info *)realloc(word_list + size, size * sizeof(word_info));
+                // save word
+                strcpy(word_list[size].word, current_word);
+                // increament numner of appreances
+                word_list->count = 1;
+                // make space for a new line number
+                (word_list + size)->lines = (word_info *)realloc(word_list + size, (word_list + size)->count);
+                // save line number
+                (word_list + size)->lines[(word_list + size)->count] = line_number;
+            }
+        }
+
+        line_number++;
     }
-    
+
     return 0;
 }
 
-int getword(char *word, int lim)
+int check_word_already_in_list(word_info *list, char *word)
+{
+    word_info *list_ptr = list;
+    int size = sizeof(list_ptr) / sizeof(*list_ptr);
+    int i = 0;
+    while (list_ptr)
+    {
+        if (strcmp(list_ptr++->word, word) == 0)
+        {
+            return i;
+        }
+        i++;
+    }
+    return -1;
+}
+
+int getword(char *word, int lim, FILE *fptr)
 {
     int c, d;
     char *w = word;
 
-    while (isspace(c = getc(stdin)))
+    while (isspace(c = getc(fptr)))
         ;
     if (c != EOF)
         *w++ = c;
     if (isalpha(c) || c == '_' || c == '#')
     {
         for (; --lim > 0; w++)
-            if (!isalnum(*w = getc(stdin)) && *w != '_')
+            if (!isalnum(*w = getc(fptr)) && *w != '_')
             {
-                ungetc(*w, stdin);
+                ungetc(*w, fptr);
                 break;
             }
     }
     else if (c == '\'' || c == '"')
     {
         for (; --lim > 0; w++)
-            if ((*w = getc(stdin)) == '\\')
+            if ((*w = getc(fptr)) == '\\')
             {
-                *++w = getc(stdin);
+                *++w = getc(fptr);
             }
             else if (*w == c)
             {
@@ -85,13 +129,13 @@ int getword(char *word, int lim)
     }
     else if (c == '/')
     {
-        if ((d = getch()) == '*')
+        if ((d = getc(fptr)) == '*')
         {
             c = comment();
         }
         else
         {
-            ungetc(d, stdin);
+            ungetc(d, fptr);
         }
     }
     else if (c == EOF)
@@ -102,20 +146,21 @@ int getword(char *word, int lim)
     *w = '\0';
     return word[0];
 }
-int comment(void)
+
+int comment(FILE *fptr)
 {
     int c;
-    while ((c = getc(stdin)) != EOF)
+    while ((c = getc(fptr)) != EOF)
     {
         if (c == '*')
         {
-            if ((c = getc(stdin)) == '/')
+            if ((c = getc(fptr)) == '/')
             {
                 break;
             }
             else
             {
-                ungetc(c, stdin);
+                ungetc(c, fptr);
             }
         }
     }
