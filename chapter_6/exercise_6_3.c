@@ -19,8 +19,8 @@ int main(int argc, char const *argv[])
     size_t line_length = 0;
     int line_number = 0;
 
-    word_info* word_list = NULL:
-    
+    word_info* word_list = NULL;
+    word_list = (word_info*)malloc(sizeof(word_info));
     // Open a file in read mode
     fptr = fopen(FILENAME, "r");
 
@@ -30,10 +30,15 @@ int main(int argc, char const *argv[])
     }
 
     int read;
-    while ((read = getline(&line, &line_length, fptr))!= -1)
+    while ((read = getline(&line, &line_length, fptr))!= -1) // get line from file
     {
+        
         line_number++;
-        // get line from file
+        for (int i = 0; *(line+i)!='\0'; i++)
+        {
+            putchar(*(line+i));
+        }
+        
         // loop over each word in the line
             // if word is not noise 
                 // if not already created, create a word_info object for the word
@@ -96,4 +101,23 @@ int getword(char *word, int lim)
 
     *w = '\0';
     return word[0];
+}
+int comment(void)
+{
+    int c;
+    while ((c = getc(stdin)) != EOF)
+    {
+        if (c == '*')
+        {
+            if ((c = getc(stdin)) == '/')
+            {
+                break;
+            }
+            else
+            {
+                ungetc(c, stdin);
+            }
+        }
+    }
+    return c;
 }
