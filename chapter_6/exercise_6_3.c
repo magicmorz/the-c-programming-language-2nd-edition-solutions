@@ -60,13 +60,13 @@ int main(int argc, char const *argv[])
             else // if not already created, create a word_info object for the word
             {
                 size++;
-                word_list = (word_info *)realloc(word_list + size, size * sizeof(word_info));
+                word_list = (word_info *)realloc(word_list, size * sizeof(word_info));
                 // save word
                 strcpy(word_list[size].word, current_word);
                 // increament numner of appreances
                 word_list->count = 1;
                 // make space for a new line number
-                (word_list + size)->lines = (word_info *)realloc(word_list + size, (word_list + size)->count);
+                (word_list + size)->lines = (word_info *)realloc(word_list, (word_list + size)->count);
                 // save line number
                 (word_list + size)->lines[(word_list + size)->count] = line_number;
             }
@@ -82,6 +82,7 @@ int check_word_already_in_list(word_info *list, char *word)
 {
     word_info *list_ptr = list;
     int size = sizeof(list_ptr) / sizeof(*list_ptr);
+    if (size == 0) return -1;
     int i = 0;
     while (list_ptr)
     {
