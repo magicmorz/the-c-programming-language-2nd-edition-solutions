@@ -5,7 +5,7 @@
 #define FILENAME "myfile.txt"
 #define MAX_WORD_LENGTH 30
 
-int getword(char *word, int lim, FILE *fptr);
+int getword(char *word, int lim, char *line);
 typedef struct
 {
     char *word;
@@ -14,17 +14,16 @@ typedef struct
 } word_info;
 
 int check_word_already_in_list(word_info *list, char *word);
-
+int size = 0;
 int main(int argc, char const *argv[])
 {
 
     char *line = NULL;
     size_t line_length = 0;
     int line_number = 0;
-    int size = 1;
-    word_info *word_list = NULL;
-    word_list = (word_info *)malloc(sizeof(word_info) * size);
-
+     size = 1;
+    // = NULL;
+    word_info *word_list = (word_info *)malloc(sizeof(word_info) * size);
     // Open a file in read mode
     FILE *fptr;
     fptr = fopen(FILENAME, "r");
@@ -45,7 +44,7 @@ int main(int argc, char const *argv[])
         char current_word[MAX_WORD_LENGTH];
         int pos;
         
-        while (getword(current_word, MAX_WORD_LENGTH, fptr)) // loop over each word in the line
+        while (getword(current_word, MAX_WORD_LENGTH, line)) // loop over each word in the line
         {
             // if this word already has a word_info object
             if ((pos = check_word_already_in_list(word_list, current_word)) != -1)
@@ -62,6 +61,7 @@ int main(int argc, char const *argv[])
                 size++;
                 word_list = (word_info *)realloc(word_list, size * sizeof(word_info));
                 // save word
+                word_list[size].word = (char*)malloc(strlen(current_word)*sizeof(char));
                 strcpy(word_list[size].word, current_word);
                 // increament numner of appreances
                 word_list->count = 1;
@@ -81,7 +81,6 @@ int main(int argc, char const *argv[])
 int check_word_already_in_list(word_info *list, char *word)
 {
     word_info *list_ptr = list;
-    int size = sizeof(list_ptr) / sizeof(*list_ptr);
     if (size == 0) return -1;
     int i = 0;
     while (list_ptr)
@@ -95,30 +94,31 @@ int check_word_already_in_list(word_info *list, char *word)
     return -1;
 }
 
-int getword(char *word, int lim, FILE *fptr)
+int getword(char *word, int lim, char *line)
 {
+    char *line_temp = line;
     int c, d;
     char *w = word;
 
-    while (isspace(c = getc(fptr)))
+    while (isspace(c = *line_temp++))
         ;
     if (c != EOF)
         *w++ = c;
     if (isalpha(c) || c == '_' || c == '#')
     {
         for (; --lim > 0; w++)
-            if (!isalnum(*w = getc(fptr)) && *w != '_')
+            if (!isalnum(*w = getc(line_temp)) && *w != '_')
             {
-                ungetc(*w, fptr);
+                ungetc(*w, line_temp);
                 break;
             }
     }
     else if (c == '\'' || c == '"')
     {
         for (; --lim > 0; w++)
-            if ((*w = getc(fptr)) == '\\')
+            if ((*w = getc(line_temp)) == '\\')
             {
-                *++w = getc(fptr);
+                *++w = getc(line_temp);
             }
             else if (*w == c)
             {
@@ -132,13 +132,13 @@ int getword(char *word, int lim, FILE *fptr)
     }
     else if (c == '/')
     {
-        if ((d = getc(fptr)) == '*')
+        if ((d = getc(line_temp)) == '*')
         {
-            c = comment();
+            c = comment(line_temp);
         }
         else
         {
-            ungetc(d, fptr);
+            ungetc(d, line_temp);
         }
     }
     else if (c == EOF)
