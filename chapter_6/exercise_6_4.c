@@ -7,6 +7,7 @@
 
 int getword(char *word, int lim, char **line_temp);
 int comment(char **line_temp);
+int compare(const void *a, const void *b);
 typedef struct
 {
     char *word;
@@ -73,16 +74,24 @@ int main(int argc, char const *argv[])
         line_number++;
     }
 
+    qsort(word_list, size, sizeof(word_list[0]), compare);
+
     for (int i = 0; i < size; i++)
     {
-        printf("%s ", word_list[i].word);
-        for (int j = 0; j < word_list[i].count; j++)
-        {
-            printf("%d ", word_list[i].lines[j]);
-        }
-        putchar('\n');
+        printf("\"%s\" appeared %d times\n", word_list[i].word,word_list[i].count);
     }
 
+    fclose(fptr);
+    return 0;
+}
+
+// Comparison function for qsort
+int compare(const void *a, const void *b) {
+    const word_info *structA = (const word_info *)a;
+    const word_info *structB = (const word_info *)b;
+    
+    if (structA->count < structB->count) return -1;
+    if (structA->count > structB->count) return 1;
     return 0;
 }
 
